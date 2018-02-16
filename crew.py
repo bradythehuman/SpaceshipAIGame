@@ -48,39 +48,45 @@ class Crew:
         self.target_pos = []
 
     def pathing(self, floor, end):
-        # Assemble graph from ship floor tiles list
+        # Assemble graph from ship floor tiles list. key = node, value = list of adjacent nodes
         graph = {}
         for tile in floor:
             adjacency_list = []
-            test_pos = transform_up(tile)
+            test_pos = transform_up(list(tile))
             if test_pos in floor:
                 adjacency_list.append(str(test_pos))
-            test_pos = transform_down(tile)
+            test_pos = transform_down(list(tile))
             if test_pos in floor:
                 adjacency_list.append(str(test_pos))
-            test_pos = transform_left(tile)
+            test_pos = transform_left(list(tile))
             if test_pos in floor:
                 adjacency_list.append(str(test_pos))
-            test_pos = transform_right(tile)
+            test_pos = transform_right(list(tile))
             if test_pos in floor:
                 adjacency_list.append(str(test_pos))
             graph[str(tile)] = adjacency_list
 
         # Rough imlimentation of breadth first search algorithm to find the shortest path from the crew members position
-        # to the end value taken as a parameter.
-        shortest_path = []
-        queue = [[str(self.pos)]]
-        while(queue and not shortest_path):
-            current = queue.pop(0)
-            if current[-1] == str(end):
-                shortest_path = current
-            else:
-                adjacency_list = graph[current[-1]]
-                for tile in adjacency_list:
-                    if tile not in current:
-                        queue.append(current + [tile])
+        # to the end value taken as a parameter. Returns empty list is path is impossible. CANNOT CURRENTLY HANDLE
+        # OBSTICALS/OTHER CREW MEMBERS!
+        initial = str(self.pos)
+        end = str(end)
+        shortest_path_tree = {initial: [initial]}
+        unknown = list(graph.keys())
+        unknown.remove(initial)
+        queue = [initial]
+        while queue:
+            node = queue.pop(0)
+            for adjacent in graph[node]:
+                if adjacent in unknown:
+                    unknown.remove(adjacent)
+                    queue.append(adjacent)
+                    shortest_path_tree[adjacent] = list(shortest_path_tree[node]) + [adjacent]
 
-        print(shortest_path)
+        if end in shortest_path_tree:
+            return shortest_path_tree[end]
+        else:
+            return []
 
 
 
@@ -109,4 +115,4 @@ if __name__ == "__main__":
 
     tim = Crew([25, 17])
     tims_ship = ship.Ship()
-    tim.pathing(tims_ship.floor, [34, 17])
+    print(tim.pathing(tims_ship.floor, [23, 10]))
