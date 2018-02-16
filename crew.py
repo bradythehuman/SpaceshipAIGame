@@ -76,7 +76,12 @@ class Crew:
                 shortest_path = current
             else:
                 adjacency_list = graph[current[-1]]
-                
+                for tile in adjacency_list:
+                    if tile not in current:
+                        queue.append(current + [tile])
+
+        print(shortest_path)
+
 
 
 
