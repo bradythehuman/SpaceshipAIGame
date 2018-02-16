@@ -52,25 +52,18 @@ class Crew:
         graph = {}
         for tile in floor:
             adjacency_list = []
-            test_pos = transform_up(list(tile))
-            if test_pos in floor:
-                adjacency_list.append(str(test_pos))
-            test_pos = transform_down(list(tile))
-            if test_pos in floor:
-                adjacency_list.append(str(test_pos))
-            test_pos = transform_left(list(tile))
-            if test_pos in floor:
-                adjacency_list.append(str(test_pos))
-            test_pos = transform_right(list(tile))
-            if test_pos in floor:
-                adjacency_list.append(str(test_pos))
-            graph[str(tile)] = adjacency_list
+            for transform in [transform_up, transform_down, transform_left, transform_right]:
+                test_pos = transform(list(tile))
+                if test_pos in floor:
+                    adjacency_list.append(tuple(test_pos))
+
+            graph[tuple(tile)] = adjacency_list
 
         # Rough imlimentation of breadth first search algorithm to find the shortest path from the crew members position
         # to the end value taken as a parameter. Returns empty list is path is impossible. CANNOT CURRENTLY HANDLE
         # OBSTICALS/OTHER CREW MEMBERS!
-        initial = str(self.pos)
-        end = str(end)
+        initial = tuple(self.pos)
+        end = tuple(end)
         shortest_path_tree = {initial: [initial]}
         unknown = list(graph.keys())
         unknown.remove(initial)
