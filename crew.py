@@ -37,6 +37,7 @@ class Crew:
         # Abstract stats
         self.stats = self.base_stats
         self.victories = 0
+        self.role = ''  # Key determinate in the get_target method
 
         # Calculated stats
         self.fear = 0
@@ -47,7 +48,7 @@ class Crew:
         self.pos = pos
         self.target_pos = []
 
-    def pathing(self, floor, end):
+    def pathing(self, floor):
         # Assemble graph from ship floor tiles list. key = node, value = list of adjacent nodes
         graph = {}
         for tile in floor:
@@ -63,7 +64,6 @@ class Crew:
         # to the end value taken as a parameter. Returns empty list is path is impossible. CANNOT CURRENTLY HANDLE
         # OBSTICALS/OTHER CREW MEMBERS!
         initial = tuple(self.pos)
-        end = tuple(end)
         shortest_path_tree = {initial: [initial]}
         unknown = list(graph.keys())
         unknown.remove(initial)
@@ -76,15 +76,11 @@ class Crew:
                     queue.append(adjacent)
                     shortest_path_tree[adjacent] = list(shortest_path_tree[node]) + [adjacent]
 
-        if end in shortest_path_tree:
-            return shortest_path_tree[end]
-        else:
-            return []
+        return shortest_path_tree
 
-
-
-
-
+    # Determines target based on assigned role and other stats.
+    def get_target(self):
+        pass
 
     # def calculate_stats(self):
     #     if self.stats["clarity"] < 2 and self.stats["aggression"] > 4:
@@ -108,4 +104,9 @@ if __name__ == "__main__":
 
     tim = Crew([25, 17])
     tims_ship = ship.Ship()
-    print(tim.pathing(tims_ship.floor, [23, 10]))
+    shortest_path_tree = tim.pathing(tims_ship.floor)
+    end = (23, 10)
+    if end in shortest_path_tree:
+        print(shortest_path_tree[end])
+    else:
+        print([])

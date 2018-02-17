@@ -12,6 +12,7 @@ my_ship = ship.Ship()
 my_crew = [crew.Crew([26, 16])]
 loop_type = 'main'
 selected_crew = False
+shortest_path_tree = {}
 
 while True:
     for event in pygame.event.get():
@@ -32,13 +33,20 @@ while True:
                 for x in my_crew:
                     if cursor_pos == x.pos:
                         selected_crew = x
-            elif event.key == pygame.K_RETURN and cursor_pos in my_ship.floor and selected_crew:
-                path = selected_crew.pathing(my_ship.floor, cursor_pos)
+            elif event.key == pygame.K_RETURN and selected_crew:
                 if path:
                     print(path)
                     selected_crew.pos = list(cursor_pos)
                     selected_crew = False
                 else:
                     print("pathing failed")
+    if selected_crew and not shortest_path_tree:
+        shortest_path_tree = selected_crew.pathing(my_ship.floor)
+    elif not selected_crew and shortest_path_tree:
+        shortest_path_tree = []
 
-    main_mod.render_frame(cursor_pos, my_ship, my_crew)
+    if tuple(cursor_pos) in shortest_path_tree:
+        path = shortest_path_tree[tuple(cursor_pos)]
+    else:
+        path = []
+    main_mod.render_frame(cursor_pos, my_ship, my_crew, path)
