@@ -8,8 +8,17 @@ class Ship:
         self.hull_dmg = 20
         self.shield_dmg = 2
         self.background = pygame.image.load("bitmaps/orange_ship.bmp")
-        self.floor = img_to_pos("bitmaps/orangeShipFloor.bmp")
+        self.tiles = {"floor": img_to_pos("bitmaps/orangeShipFloor.bmp"),
+                      # "cockpit": img_to_pos(),
+                      # "turret": img_to_pos(),
+                      # "bed": img_to_pos(),
+                      # "engine": img_to_pos()
+                      }
 
+        self.crew = []
+
+    def get_available_roles(self):
+        pass
 
 def img_to_pos(path):
     img = pygame.image.load(path)

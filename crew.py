@@ -46,7 +46,7 @@ class Crew:
 
         # Spacial stats
         self.pos = pos
-        self.target_pos = []
+        self.target = []
 
     def pathing(self, floor):
         # Assemble graph from ship floor tiles list. key = node, value = list of adjacent nodes
@@ -78,26 +78,23 @@ class Crew:
 
         return shortest_path_tree
 
-    # Determines target based on assigned role and other stats.
+    def calculate_stats(self):
+        if self.stats["clarity"] < 2 and self.stats["aggression"] > 4:
+            self.frenzied = True
+        else:
+            self.frenzied = False
+
+        fear = 0
+        # Add fear if enemy damage potential is a certain degree above your own. (degree depends on confidence)
+        # Add fear if room is on fire, out of oxygen or broken in some way
+        # Add fear if AI is percieved as malicious
+        self.fear = fear
+
+    # Determines target based on assigned role and other stats
     def get_target(self):
-        pass
-
-    # def calculate_stats(self):
-    #     if self.stats["clarity"] < 2 and self.stats["aggression"] > 4:
-    #         self.frenzied = True
-    #     else:
-    #         self.frenzied = False
-    #
-    #     fear = 0
-    #     # Add fear if enemy damage potential is a certain degree above your own. (degree depends on confidence)
-    #     # Add fear if room is on fire, out of oxygen or broken in some way
-    #     # Add fear if AI is percieved as malicious
-    #     self.fear = fear
-
-    # def get_target(self):
-    #     if self.frenzied:
-    #         # Attack the nearest person
-    #         pass
+        if self.frenzied:
+            # Attack the nearest person
+            pass
 
 if __name__ == "__main__":
     import ship
