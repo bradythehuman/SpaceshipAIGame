@@ -1,3 +1,5 @@
+import os
+
 import pygame
 
 
@@ -8,17 +10,16 @@ class Ship:
         self.hull_dmg = 20
         self.shield_dmg = 2
         self.background = pygame.image.load("bitmaps/orange_ship.bmp")
-        self.tiles = {"floor": img_to_pos("bitmaps/orangeShipFloor.bmp"),
-                      # "cockpit": img_to_pos(),
-                      # "turret": img_to_pos(),
-                      # "bed": img_to_pos(),
-                      # "engine": img_to_pos()
-                      }
+        self.map = {}
+        map_folder = "bitmaps\orange ship"
+        for file in os.listdir(map_folder):
+            self.map[file[4:len(file) - 4]] = img_to_pos(map_folder + "\\" + file)
 
         self.crew = []
 
     def get_available_roles(self):
         pass
+
 
 def img_to_pos(path):
     img = pygame.image.load(path)
@@ -32,4 +33,5 @@ def img_to_pos(path):
 
 if __name__ == "__main__":
     my_ship = Ship()
-    print("floor: " + str(my_ship.floor))
+    for i in my_ship.map:
+        print(i + ": " + str(len(my_ship.map[i])))
