@@ -30,6 +30,7 @@ class Game:
         # Run level variables
         self.cursor_pos = [20, 20]
         self.my_ship = ship.Ship()
+        self.my_ship.crew.append(crew.Crew((26, 16)))
         self.loop_type = 'main'
         self.selected_crew = False
         self.shortest_path_tree = {}
