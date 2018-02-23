@@ -1,23 +1,3 @@
-def transform_up(pos, scalar=1):
-    pos[1] -= scalar
-    return pos
-
-
-def transform_down(pos, scalar=1):
-    pos[1] += scalar
-    return pos
-
-
-def transform_left(pos, scalar=1):
-    pos[0] -= scalar
-    return pos
-
-
-def transform_right(pos, scalar=1):
-    pos[0] += scalar
-    return pos
-
-
 class Crew:
     base_stats = {"max_health": 5,  # Basic stats
                   "defense": 0,
@@ -33,20 +13,23 @@ class Crew:
                   "medic": 0,
                   "combat": 0}
 
-    def __init__(self, pos):
+    def __init__(self):
         # Abstract stats
         self.stats = self.base_stats
         self.health = self.stats["max_health"]
         self.role = ''  # Key determinate in the get_target method
 
         # Calculated stats
-        self.fear = 0
-        self.frenzied = False
-        self.experience_with_ai = 0
+        self.state = "calm"
 
         # Spacial stats
-        self.pos = pos
+        self.pos = [0, 0]
         self.target = []
+
+    def update(self, game):
+        self.pos = game.my_ship.map["bed"][game.crew.index(self)]  # Should only be done between rounds
+        self.update_state(game.mood)
+        self.get_target()
 
     def pathing(self, floor):
         # Assemble graph from ship floor tiles list. key = node, value = list of adjacent nodes
@@ -78,23 +61,41 @@ class Crew:
 
         return shortest_path_tree
 
-    def calculate_stats(self):
-        if self.stats["clarity"] < 2 and self.stats["aggression"] > 4:
-            self.frenzied = True
+    def update_state(self, mood):
+        if self.stats["delusional"] and self.stats["aggressive"] and mood.state == "terrified":
+            self.state = "frenzied"
         else:
-            self.frenzied = False
-
-        fear = 0
-        # Add fear if enemy damage potential is a certain degree above your own. (degree depends on confidence)
-        # Add fear if room is on fire, out of oxygen or broken in some way
-        # Add fear if AI is percieved as malicious
-        self.fear = fear
+            self.state = "calm"
 
     # Determines target based on assigned role and other stats
     def get_target(self):
-        if self.frenzied:
+        if self.state == "frenzied":
             # Attack the nearest person
             pass
+
+    def display_stats(self):
+        pass
+
+
+def transform_up(pos, scalar=1):
+    pos[1] -= scalar
+    return pos
+
+
+def transform_down(pos, scalar=1):
+    pos[1] += scalar
+    return pos
+
+
+def transform_left(pos, scalar=1):
+    pos[0] -= scalar
+    return pos
+
+
+def transform_right(pos, scalar=1):
+    pos[0] += scalar
+    return pos
+
 
 if __name__ == "__main__":
     import ship

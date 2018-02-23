@@ -3,6 +3,7 @@ import pygame
 
 import crew
 import ship
+import mood
 
 
 class Game:
@@ -30,7 +31,8 @@ class Game:
         # Run level variables
         self.cursor_pos = [20, 20]
         self.my_ship = ship.Ship()
-        self.crew [crew.Crew((26, 16))]
+        self.crew = [crew.Crew()]
+        self.mood = mood.Mood()
         self.loop_type = 'main'
         self.selected_crew = False
         self.shortest_path_tree = {}
@@ -51,7 +53,7 @@ class Game:
         self.screen.fill(self.black)
         self.screen.blit(self.bar_gui, (0, 0))
         self.screen.blit(self.my_ship.background, (0, 8 * self.scale))
-        for crew_member in self.my_ship.crew:
+        for crew_member in self.crew:
             pos = crew_member.pos
             pygame.draw.rect(self.screen, self.crew_color, (pos[0] * 12 + 2, pos[1] * 12 + 98, 8, 8))
         self.screen.blit(self.cursor, (self.cursor_pos[0] * 12, self.cursor_pos[1] * 12 + 96))
@@ -79,6 +81,10 @@ class Game:
 
         pygame.display.flip()
 
+    def update(self):
+        for member in self.crew:
+            member.update(self)
+
     def unit_selected_loop(self, event):
         self.try_quit(event)
         self.try_move_cursor(event)
@@ -103,7 +109,7 @@ class Game:
             for x in self.crew:
                 if self.cursor_pos == x.pos:
                     selected_crew = x
-                    self.shortest_path_tree = selected_crew.pathing(self.my_ship.tiles["floor"])
+                    self.shortest_path_tree = selected_crew.pathing(self.my_ship.map["floor"])
         elif event.key == pygame.K_RETURN and self.selected_crew:
 
             if self.path:

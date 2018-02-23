@@ -3,13 +3,14 @@ import pygame
 
 import game
 
-game = game.Game()
+my_game = game.Game()
+my_game.update()
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
         elif event.type == pygame.KEYDOWN:
-            game.unit_selected_loop(event)
+            my_game.unit_selected_loop(event)
 
-    game.update_path()
-    game.render_frame()
+    my_game.update_path()
+    my_game.render_frame()

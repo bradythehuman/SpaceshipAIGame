@@ -4,11 +4,14 @@ import pygame
 
 
 class Ship:
+    base_hull = 50
+    base_shield = 3
+
     def __init__(self):
-        self.hull = 50
-        self.shield = 3
-        self.hull_dmg = 20
-        self.shield_dmg = 2
+        self.hull = self.base_hull
+        self.shield = self.base_shield
+        self.hull_dmg = 0
+        self.shield_dmg = 0
         self.background = pygame.image.load("bitmaps/orange_ship.bmp")
         self.map = {}
         map_folder = "bitmaps\orange ship"
@@ -32,4 +35,5 @@ def img_to_pos(path):
 if __name__ == "__main__":
     my_ship = Ship()
     for i in my_ship.map:
-        print(i + ": " + str(len(my_ship.map[i])))
+        # print((" " * (20-len(i))) + i + ": " + str(len(my_ship.map[i])))
+        print((" " * (20-len(i))) + i + ": " + str(my_ship.map[i]))
