@@ -19,13 +19,13 @@ def transform_right(pos, scalar=1):
 
 
 class Crew:
-    base_stats = {"health": 10,  # Basic stats
-                  "defense": 1,
+    base_stats = {"max_health": 5,  # Basic stats
+                  "defense": 0,
                   "attack": 1,
-                  "clarity": 3,  # Personality
-                  "aggression": 3,
-                  "recklessness": 3,
-                  "confidence": 3,
+                  "delusional": False,  # Personality
+                  "aggressive": False,
+                  "recklessness": False,
+                  "over-confident": False,
                   "selfish": False,
                   "turret_operator": 0,  # Skills
                   "pilot": 0,
@@ -36,7 +36,7 @@ class Crew:
     def __init__(self, pos):
         # Abstract stats
         self.stats = self.base_stats
-        self.victories = 0
+        self.health = self.stats["max_health"]
         self.role = ''  # Key determinate in the get_target method
 
         # Calculated stats

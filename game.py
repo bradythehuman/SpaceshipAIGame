@@ -30,7 +30,7 @@ class Game:
         # Run level variables
         self.cursor_pos = [20, 20]
         self.my_ship = ship.Ship()
-        self.my_ship.crew.append(crew.Crew((26, 16)))
+        self.crew [crew.Crew((26, 16))]
         self.loop_type = 'main'
         self.selected_crew = False
         self.shortest_path_tree = {}
@@ -99,8 +99,8 @@ class Game:
             self.cursor_pos[0] += 1
 
     def try_select_crew(self, event):
-        if event.key == pygame.K_RETURN and self.cursor_pos in [x.pos for x in self.my_ship.crew] and not self.selected_crew:
-            for x in self.my_ship.crew:
+        if event.key == pygame.K_RETURN and self.cursor_pos in [x.pos for x in self.crew] and not self.selected_crew:
+            for x in self.crew:
                 if self.cursor_pos == x.pos:
                     selected_crew = x
                     self.shortest_path_tree = selected_crew.pathing(self.my_ship.tiles["floor"])

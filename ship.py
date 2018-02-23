@@ -15,8 +15,6 @@ class Ship:
         for file in os.listdir(map_folder):
             self.map[file[4:len(file) - 4]] = img_to_pos(map_folder + "\\" + file)
 
-        self.crew = []
-
     def get_available_roles(self):
         pass
 
