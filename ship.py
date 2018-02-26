@@ -30,10 +30,3 @@ def img_to_pos(path):
             if img.get_at((i, j)) != (0, 0, 0, 255):
                 result.append([i, j])
     return result
-
-
-if __name__ == "__main__":
-    my_ship = Ship()
-    for i in my_ship.map:
-        # print((" " * (20-len(i))) + i + ": " + str(len(my_ship.map[i])))
-        print((" " * (20-len(i))) + i + ": " + str(my_ship.map[i]))
