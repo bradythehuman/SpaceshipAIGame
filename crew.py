@@ -18,10 +18,8 @@ class Crew:
         self.stats = self.base_stats
         self.health = self.stats["max_health"]
         self.role = ''  # Key determinate in the get_target method
-
         # Calculated stats
         self.state = "calm"
-
         # Spacial stats
         self.pos = [0, 0]
         self.target = []
@@ -40,9 +38,7 @@ class Crew:
                 test_pos = transform(list(tile))
                 if test_pos in floor:
                     adjacency_list.append(tuple(test_pos))
-
             graph[tuple(tile)] = adjacency_list
-
         # Rough imlimentation of breadth first search algorithm to find the shortest path from the crew members position
         # to the end value taken as a parameter. Returns empty list is path is impossible. CANNOT CURRENTLY HANDLE
         # OBSTICALS/OTHER CREW MEMBERS!
@@ -58,7 +54,6 @@ class Crew:
                     unknown.remove(adjacent)
                     queue.append(adjacent)
                     shortest_path_tree[adjacent] = list(shortest_path_tree[node]) + [adjacent]
-
         return shortest_path_tree
 
     def update_state(self, mood):
@@ -99,7 +94,6 @@ def transform_right(pos, scalar=1):
 
 if __name__ == "__main__":
     import ship
-
     tim = Crew([25, 17])
     tims_ship = ship.Ship()
     shortest_path_tree = tim.pathing(tims_ship.floor)
