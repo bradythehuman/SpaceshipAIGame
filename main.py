@@ -55,6 +55,7 @@ class Game:
     fullscreen = False
 
     def __init__(self):
+        # INITIALIZE
         if self.fullscreen:
             self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
         else:
@@ -62,9 +63,9 @@ class Game:
         pygame.font.init()
         # RUN LEVEL VARIABLES
         self.my_ship = ship.Ship()
-        self.crew = [crew.Crew()]
+        self.crew = [crew.Crew(self)]
         self.mood = mood.Mood()
-        self.states = [SelectAction()]
+        self.states = [Encounter()]
         # LOAD GRAPHICS
         self.myfont = pygame.font.SysFont('Courier New', self.font_scale)
         self.bar_gui = pygame.image.load("bitmaps/bar_gui.bmp")
@@ -77,6 +78,8 @@ class Game:
             self.pathsRed[i] = pygame.Surface(rect.size).convert()
             self.pathsRed[i].blit(paths_red_img, (0, 0), rect)
             self.pathsRed[i].set_colorkey((0, 0, 0))
+        # UPDATE
+        self.update()
 
     def render_frame(self):
         self.screen.fill(self.black)
@@ -98,26 +101,52 @@ class Game:
         for i in range(len(self.states[-1].console)):
             self.screen.blit(self.myfont.render(self.states[-1].console[i], False, self.font_color),
                              (576, (i*self.font_scale)))
+        for door in self.my_ship.doors:
+            if door.is_closed:
+                if door.is_vertical:
+                    self.screen.blit(self.my_ship.door_bmps[4], (door.pos[0] * 12, door.pos[1] * 12 + 96))
+                else:
+                    self.screen.blit(self.my_ship.door_bmps[0], (door.pos[0] * 12, door.pos[1] * 12 + 96))
+            else:
+                if door.is_vertical:
+                    self.screen.blit(self.my_ship.door_bmps[5], (door.pos[0] * 12, (door.pos[1]-1) * 12 + 96))
+                    self.screen.blit(self.my_ship.door_bmps[6], (door.pos[0] * 12, door.pos[1] * 12 + 96))
+                    self.screen.blit(self.my_ship.door_bmps[7], (door.pos[0] * 12, (door.pos[1]+1) * 12 + 96))
+                else:
+                    self.screen.blit(self.my_ship.door_bmps[1], ((door.pos[0]-1) * 12, door.pos[1] * 12 + 96))
+                    self.screen.blit(self.my_ship.door_bmps[2], (door.pos[0] * 12, door.pos[1] * 12 + 96))
+                    self.screen.blit(self.my_ship.door_bmps[3], ((door.pos[0]+1) * 12, door.pos[1] * 12 + 96))
         pygame.display.flip()
 
     def update(self):
         for member in self.crew:
             member.update(self)
 
-    def is_empty_floor(self, pos):
-        if pos not in self.my_ship.map["floor"]:
-            return False
-        for member in self.crew:
-            if tuple(member.pos) == pos:
-                return False
-        return True
+    def get_empty_floor(self):
+        floor = []
+        for tile in self.my_ship.map["floor"]:
+            if tile not in [member.pos for member in self.crew]:
+                floor.append(tile)
+        return floor
+
+    def push_states(self, state):
+        self.states.append(state)
+
+    def pop_states(self, n):
+        if n == 1:
+            return self.states.pop()
+        else:
+            return [self.states.pop(-1) for i in range(n)]
+
+    def get_state(self):
+        return self.states[-1]
 
 
 class State:
     console = ["Warning. This is the default state.", "Warning. This is the default state."]
 
-    def __init__(self):
-        self.cursor_pos = [20, 20]
+    def __init__(self, cursor_pos=[20, 20]):
+        self.cursor_pos = cursor_pos
         self.path = []
 
     def try_quit(self, event):
@@ -142,7 +171,7 @@ class SelectAction(State):
         self.try_quit(event)
         self.try_move_cursor(event)
         if event.key == pygame.K_m:
-            game.states.append(SelectUnit(self.cursor_pos))
+            game.push_states(SelectUnit(self.cursor_pos))
         elif event.key == pygame.K_s:
             pass
         elif event.key == pygame.K_k:
@@ -163,7 +192,7 @@ class SelectUnit(State):
         if event.key == pygame.K_RETURN and self.cursor_pos in [x.pos for x in game.crew]:
             for x in game.crew:
                 if self.cursor_pos == x.pos:
-                    game.states.append(SelectSpace(x))
+                    game.push_states(SelectSpace(x))
 
 
 class SelectSpace(State):
@@ -172,7 +201,6 @@ class SelectSpace(State):
     def __init__(self, selected_crew):
         self.cursor_pos = list(selected_crew.pos)
         self.selected_crew = selected_crew
-        self.shortest_path_tree = selected_crew.pathing(game.my_ship.map["floor"])
         self.path = []
 
     def check_event(self, event):
@@ -180,31 +208,47 @@ class SelectSpace(State):
         self.try_quit(event)
         self.try_move_cursor(event)
         if event.key == pygame.K_RETURN and self.path:
-            self.selected_crew.pos = list(self.cursor_pos)
+            self.selected_crew.move_unit(self.cursor_pos)
             game.states[-3].cursor_pos = list(self.cursor_pos)
-            game.states = game.states[:-2]
-        # Update
-        if tuple(self.cursor_pos) in self.shortest_path_tree:
-            self.path = self.shortest_path_tree[tuple(self.cursor_pos)]
-        else:
-            self.path = []
+            game.pop_states(2)
+        # Update path displayed
+        self.path = self.selected_crew.get_path(self.cursor_pos)
 
 
-class Encounter:
-    def __init__(self):
-        pass
+class Encounter(State):
+    console = ["(M)ove unit.", "(O)pen or close doors."]
+
+    def check_event(self, event):
+        self.try_quit(event)
+        self.try_move_cursor(event)
+        if event.key == pygame.K_m:
+            game.push_states(SelectUnit(self.cursor_pos))
+        elif event.key == pygame.K_o:
+            game.push_states(ChangeDoors(self.cursor_pos))
+
+
+class ChangeDoors(State):
+    console = ["Select a door to open/close it.", "Press 'O' to stop changing door states"]
+
+    def check_event(self, event):
+        self.try_quit(event)
+        self.try_move_cursor(event)
+        if event.key == pygame.K_RETURN:
+            if game.my_ship.query_map(self.cursor_pos, "doors"):
+                game.my_ship.change_door_state(self.cursor_pos)
+        if event.key == pygame.K_o:
+            game.states[-2].cursor_pos = list(self.cursor_pos)
+            game.pop_states(1)
 
 
 if __name__ == "__main__":
-    # game is being used as a global variable because there is only ever one instance of Game() and it is constantly mutated
+    # game is being used as a global variable because there is only ever one instance of Game() and it is
+    # constantly mutated
     game = Game()
-    game.update()
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
-                if event == pygame.K_m:
-                    print("That's an m alright")
-                game.states[-1].check_event(event)
+                game.get_state().check_event(event)
         game.render_frame()
