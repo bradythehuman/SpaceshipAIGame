@@ -145,8 +145,8 @@ class Game:
 class State:
     console = ["Warning. This is the default state.", "Warning. This is the default state."]
 
-    def __init__(self, cursor_pos=[20, 20]):
-        self.cursor_pos = cursor_pos
+    def __init__(self, cursor_pos=(20, 20)):
+        self.cursor_pos = list(cursor_pos)
         self.path = []
 
     def try_quit(self, event):
@@ -235,7 +235,7 @@ class ChangeDoors(State):
         self.try_move_cursor(event)
         if event.key == pygame.K_RETURN:
             if game.my_ship.query_map(self.cursor_pos, "doors"):
-                game.my_ship.change_door_state(self.cursor_pos)
+                game.my_ship.change_door_state(self.cursor_pos, game)
         if event.key == pygame.K_o:
             game.states[-2].cursor_pos = list(self.cursor_pos)
             game.pop_states(1)

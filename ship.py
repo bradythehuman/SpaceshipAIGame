@@ -18,7 +18,6 @@ class Ship:
         map_folder = "bitmaps\orange ship"
         for file in os.listdir(map_folder):
             self.map[file[4:len(file) - 4]] = positional.img_to_pos(map_folder + "\\" + file)
-        # self.doors = [Door((list(x)[0], list(x)[1]-1), self.map["floor"], self.map["hull"]) for x in self.map["doors"]]
         self.doors = [Door(x, self.map["floor"], self.map["hull"]) for x in self.map["doors"]]
         door_bmps = pygame.image.load("bitmaps/doors.bmp").convert()
         door_tile_count = 8
@@ -29,9 +28,9 @@ class Ship:
             self.door_bmps[i].blit(door_bmps, (0, 0), rect)
             self.door_bmps[i].set_colorkey((0, 0, 0))
 
-    def change_door_state(self, pos):
+    def change_door_state(self, pos, game):
         for door in self.doors:
-            if door.pos == pos:
+            if door.pos == pos and pos in game.get_empty_floor():
                 door.open_close()
 
     def get_available_roles(self):
@@ -62,7 +61,49 @@ class Door:
         self.is_broken = False
 
     def open_close(self):
-        if self.is_closed:
-            self.is_closed = False
+        self.is_closed = not self.is_closed
+
+    def damage(self):
+        self.is_broken = True
+
+    def fix(self):
+        self.is_broken = False
+
+
+class TurretMount:
+    def __init__(self, pos):
+        self.pos = pos
+        self.is_auto = True
+        self.cockpit = []  # For position. Leave blank if is_auto
+        self.turret = False
+        self.target = False
+
+    def battle_select(self):
+        if self.turret:
+            if self.turret.is_functional():
+                if self.if_auto:
+                    # Aim turret
+                else:
+                    return 
+            else:
+                return "That turret is broken"
         else:
-            self.is_closed = True
+            return "That mount has no turret"
+
+
+class Turret:
+    def __init__(self):
+        self.health = 3
+        self.damage
+
+    def is_functional(self):
+
+class Thruster:
+    pass
+
+
+class Engine:
+    pass
+
+
+class

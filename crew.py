@@ -16,9 +16,8 @@ class Crew:
                   "medic": 0,
                   "combat": 0}
 
-    def __init__(self, game):
+    def __init__(self):
         # Abstract stats
-        self.game = game
         self.stats = self.base_stats
         self.health = self.stats["max_health"]
         self.role = ''  # Key determinate in the get_target method
