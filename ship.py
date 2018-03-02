@@ -84,17 +84,21 @@ class TurretMount:
                 if self.if_auto:
                     # Aim turret
                 else:
-                    return 
+                    return
             else:
                 return "That turret is broken"
         else:
             return "That mount has no turret"
 
 
-class Turret:
+class Upgrade:
+    def __init__(self):
+        
+
+class Turret(Upgrade):
     def __init__(self):
         self.health = 3
-        self.damage
+        self.damage = 0
 
     def is_functional(self):
 
