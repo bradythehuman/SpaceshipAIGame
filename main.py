@@ -149,6 +149,11 @@ class State:
         self.cursor_pos = list(cursor_pos)
         self.path = []
 
+    def process_event(self, event):
+        self.try_quit(event)
+        self.try_move_cursor(event)
+        self.update()
+
     def try_quit(self, event):
         if event.key == pygame.K_ESCAPE:
             sys.exit()
@@ -163,82 +168,62 @@ class State:
         elif event.key == pygame.K_RIGHT and self.cursor_pos[0] < 48:
             self.cursor_pos[0] += 1
 
+    def update(self):
+        pass
 
-class SelectAction(State):
-    console = ["(M)ove unit.", "(S)pawn unit.", "(K)ill unit."]
 
-    def check_event(self, event):
-        self.try_quit(event)
-        self.try_move_cursor(event)
+class Encounter(State):
+    console = ["(M)ove unit.", "(O)pen or close doors."]
+
+    def process_event(self, event):
         if event.key == pygame.K_m:
             game.push_states(SelectUnit(self.cursor_pos))
-        elif event.key == pygame.K_s:
-            pass
-        elif event.key == pygame.K_k:
-            pass
+        elif event.key == pygame.K_o:
+            game.push_states(ChangeDoors(self.cursor_pos))
+        super().process_event(event)
 
 
 class SelectUnit(State):
     console = ["Select unit..."]
 
-    def __init__(self, cursor_pos):
-        self.cursor_pos = cursor_pos
-        self.path = []
-
-    def check_event(self, event):
-        # Event Processing
-        self.try_quit(event)
-        self.try_move_cursor(event)
+    def process_event(self, event):
         if event.key == pygame.K_RETURN and self.cursor_pos in [x.pos for x in game.crew]:
             for x in game.crew:
                 if self.cursor_pos == x.pos:
                     game.push_states(SelectSpace(x))
+        super().process_event(event)
 
 
 class SelectSpace(State):
     console = ["Select space..."]
 
     def __init__(self, selected_crew):
-        self.cursor_pos = list(selected_crew.pos)
+        super().__init__(tuple(selected_crew.pos))
         self.selected_crew = selected_crew
-        self.path = []
 
-    def check_event(self, event):
-        # Event Processing
-        self.try_quit(event)
-        self.try_move_cursor(event)
+    def process_event(self, event):
+
         if event.key == pygame.K_RETURN and self.path:
             self.selected_crew.move_unit(self.cursor_pos)
             game.states[-3].cursor_pos = list(self.cursor_pos)
             game.pop_states(2)
-        # Update path displayed
+        super().process_event(event)
+
+    def update(self):
         self.path = self.selected_crew.get_path(self.cursor_pos)
-
-
-class Encounter(State):
-    console = ["(M)ove unit.", "(O)pen or close doors."]
-
-    def check_event(self, event):
-        self.try_quit(event)
-        self.try_move_cursor(event)
-        if event.key == pygame.K_m:
-            game.push_states(SelectUnit(self.cursor_pos))
-        elif event.key == pygame.K_o:
-            game.push_states(ChangeDoors(self.cursor_pos))
 
 
 class ChangeDoors(State):
     console = ["Select a door to open/close it.", "Press 'O' to stop changing door states"]
 
-    def check_event(self, event):
-        self.try_quit(event)
-        self.try_move_cursor(event)
+    def process_event(self, event):
         if event.key == pygame.K_RETURN:
             if game.my_ship.query_map(self.cursor_pos, "doors"):
                 game.my_ship.change_door_state(self.cursor_pos, game)
         if event.key == pygame.K_o:
             game.states[-2].cursor_pos = list(self.cursor_pos)
             game.pop_states(1)
+        super().process_event(event)
 
 
 if __name__ == "__main__":
@@ -250,5 +235,5 @@ if __name__ == "__main__":
             if event.type == pygame.QUIT:
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
-                game.get_state().check_event(event)
+                game.get_state().process_event(event)
         game.render_frame()
