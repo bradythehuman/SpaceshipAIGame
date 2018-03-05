@@ -5,11 +5,6 @@ class Crew:
     base_stats = {"max_health": 5,  # Basic stats
                   "defense": 0,
                   "attack": 1,
-                  "delusional": False,  # Personality
-                  "aggressive": False,
-                  "recklessness": False,
-                  "over-confident": False,
-                  "selfish": False,
                   "turret_operator": 0,  # Skills
                   "pilot": 0,
                   "mechanic": 0,
@@ -21,6 +16,7 @@ class Crew:
         self.stats = self.base_stats
         self.health = self.stats["max_health"]
         self.role = ''  # Key determinate in the get_target method
+        self.personality = []
         self.state = "calm"
         # Spacial stats
         self.pos = [0, 0]
@@ -28,13 +24,16 @@ class Crew:
         self.shortest_path_tree = {}
 
     def update(self, game):
-        self.pos = game.my_ship.map["bed"][game.crew.index(self)]  # Should only be done between rounds
         self.update_state(game.mood)
         self.get_target()
-        self.update_path_tree()
+        self.update_path_tree(game)
 
-    def update_path_tree(self):
-        floor = self.game.get_empty_floor() + [self.pos]
+    def initialize_round(self, game):
+        self.pos = game.my_ship.map["bed"][game.crew.index(self)]
+        self.update(game)
+
+    def update_path_tree(self, game):
+        floor = game.get_empty_floor() + [self.pos]
         # Assemble graph from ship floor tiles list. key = node, value = list of adjacent nodes
         graph = {}
         for tile in floor:
@@ -80,13 +79,14 @@ class Crew:
         else:
             return []
 
-    def move_unit(self, target_pos):
+    def move_unit(self, target_pos, game):
         self.pos = target_pos
-        self.update_path_tree()
+        self.update(game)
 
     def display_stats(self):
         pass
 
 
+class EmotionalState:
 
 

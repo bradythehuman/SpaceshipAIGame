@@ -83,8 +83,9 @@ class TurretMount:
             if self.turret.is_functional():
                 if self.if_auto:
                     # Aim turret
+                    pass
                 else:
-                    return
+                    return "Bep"
             else:
                 return "That turret is broken"
         else:
@@ -93,7 +94,8 @@ class TurretMount:
 
 class Upgrade:
     def __init__(self):
-        
+        pass
+
 
 class Turret(Upgrade):
     def __init__(self):
@@ -101,6 +103,12 @@ class Turret(Upgrade):
         self.damage = 0
 
     def is_functional(self):
+        pass
+
+
+class WeaponsSystem:
+    pass
+
 
 class Thruster:
     pass
@@ -110,4 +118,13 @@ class Engine:
     pass
 
 
-class
+class Teleporter:
+    pass
+
+
+class Storage:
+    pass
+
+
+class LifeSupport:
+    pass

@@ -63,7 +63,7 @@ class Game:
         pygame.font.init()
         # RUN LEVEL VARIABLES
         self.my_ship = ship.Ship()
-        self.crew = [crew.Crew(self)]
+        self.crew = [crew.Crew()]
         self.mood = mood.Mood()
         self.states = [Encounter()]
         # LOAD GRAPHICS
@@ -118,6 +118,10 @@ class Game:
                     self.screen.blit(self.my_ship.door_bmps[3], ((door.pos[0]+1) * 12, door.pos[1] * 12 + 96))
         pygame.display.flip()
 
+    def initialize_round(self):
+        for member in self.crew:
+            member.initialize_round(self)
+
     def update(self):
         for member in self.crew:
             member.update(self)
@@ -149,7 +153,7 @@ class State:
         self.cursor_pos = list(cursor_pos)
         self.path = []
 
-    def process_event(self, event):
+    def process_event(self, event, game):
         self.try_quit(event)
         self.try_move_cursor(event)
         self.update()
@@ -173,25 +177,25 @@ class State:
 
 
 class Encounter(State):
-    console = ["(M)ove unit.", "(O)pen or close doors."]
+    console = ["(M)ove unit.", "(O)pen or close doors.", "(R)equest action", ""]
 
-    def process_event(self, event):
+    def process_event(self, event, game):
         if event.key == pygame.K_m:
             game.push_states(SelectUnit(self.cursor_pos))
         elif event.key == pygame.K_o:
             game.push_states(ChangeDoors(self.cursor_pos))
-        super().process_event(event)
+        super().process_event(event, game)
 
 
 class SelectUnit(State):
     console = ["Select unit..."]
 
-    def process_event(self, event):
+    def process_event(self, event, game):
         if event.key == pygame.K_RETURN and self.cursor_pos in [x.pos for x in game.crew]:
             for x in game.crew:
                 if self.cursor_pos == x.pos:
                     game.push_states(SelectSpace(x))
-        super().process_event(event)
+        super().process_event(event, game)
 
 
 class SelectSpace(State):
@@ -201,13 +205,13 @@ class SelectSpace(State):
         super().__init__(tuple(selected_crew.pos))
         self.selected_crew = selected_crew
 
-    def process_event(self, event):
+    def process_event(self, event, game):
 
         if event.key == pygame.K_RETURN and self.path:
-            self.selected_crew.move_unit(self.cursor_pos)
+            self.selected_crew.move_unit(self.cursor_pos, game)
             game.states[-3].cursor_pos = list(self.cursor_pos)
             game.pop_states(2)
-        super().process_event(event)
+        super().process_event(event, game)
 
     def update(self):
         self.path = self.selected_crew.get_path(self.cursor_pos)
@@ -216,24 +220,25 @@ class SelectSpace(State):
 class ChangeDoors(State):
     console = ["Select a door to open/close it.", "Press 'O' to stop changing door states"]
 
-    def process_event(self, event):
+    def process_event(self, event, game):
         if event.key == pygame.K_RETURN:
             if game.my_ship.query_map(self.cursor_pos, "doors"):
                 game.my_ship.change_door_state(self.cursor_pos, game)
         if event.key == pygame.K_o:
             game.states[-2].cursor_pos = list(self.cursor_pos)
             game.pop_states(1)
-        super().process_event(event)
+        super().process_event(event, game)
 
 
 if __name__ == "__main__":
     # game is being used as a global variable because there is only ever one instance of Game() and it is
     # constantly mutated
     game = Game()
+    game.initialize_round()
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
-                game.get_state().process_event(event)
+                game.get_state().process_event(event, game)
         game.render_frame()
